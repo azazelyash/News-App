@@ -1,4 +1,9 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:news_app/auth/auth.services.dart';
+import 'package:news_app/auth/shared.services.dart';
+import 'package:news_app/screens/newsPage/controller/new.page.controller.dart';
+import 'package:news_app/screens/newsPage/view/news.page.view.dart';
 import 'package:news_app/utils/constants.dart';
 import 'package:news_app/widgets/InputField.dart';
 
@@ -12,6 +17,27 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   TextEditingController _emailController = TextEditingController();
   TextEditingController _passwordController = TextEditingController();
+
+  Network network = Network();
+  AuthServices authServices = AuthServices();
+  SharedService sharedService = SharedService();
+
+  bool empty() {
+    if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
+      return true;
+    }
+    return false;
+  }
+
+  bool validateEmail(String email) {
+    String pattern = r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$';
+    RegExp regExp = RegExp(pattern);
+    return regExp.hasMatch(email);
+  }
+
+  bool validatePassword(String password) {
+    return password.length >= 6 ? true : false;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -82,7 +108,59 @@ class _LoginPageState extends State<LoginPage> {
               ),
             ),
           ),
-          onPressed: () {},
+          onPressed: () async {
+            if (empty()) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Please fill all the fields'),
+                ),
+              );
+              return;
+            } else if (!validateEmail(_emailController.text)) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Please enter a valid email'),
+                ),
+              );
+              return;
+            } else if (!validatePassword(_passwordController.text)) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Password must be atleast 6 characters'),
+                ),
+              );
+              return;
+            }
+
+            showDialog(
+              context: context,
+              builder: (context) {
+                return Center(
+                  child: CircularProgressIndicator(
+                    color: kPrimaryColor,
+                  ),
+                );
+              },
+            );
+
+            bool status = await authServices.signIn(_emailController.text, _passwordController.text);
+            if (!mounted) return;
+            Navigator.of(context).pop();
+            if (status) {
+              sharedService.saveUserLoggedInStatus(true);
+              Navigator.of(context).pushReplacement(
+                CupertinoPageRoute(
+                  builder: (context) => const NewsPage(),
+                ),
+              );
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Invalid Credentials'),
+                ),
+              );
+            }
+          },
           child: const Text('Login'),
         ),
       ),
