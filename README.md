@@ -1,7 +1,7 @@
 # Flutter News App
 
 <!-- ![App Screenshot](/assets/news.gif) -->
-<img src="/assets/news.gif" alt="App Screenshot" height="100">
+<img src="./assets/news.gif" alt="App Screenshot" height="500">
 
 ## Overview
 
