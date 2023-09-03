@@ -15,13 +15,12 @@ Future<void> main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
   await dotenv.load(fileName: ".env");
-  SharedService().getUserLoggedInStatus().then((value) {
-    if (value == true) {
-      defaultHome = const NewsPage();
-    } else {
-      defaultHome = const HomePage();
-    }
-  });
+  bool? status = await SharedService().getUserLoggedInStatus();
+  if (status == true) {
+    defaultHome = const NewsPage();
+  } else {
+    defaultHome = const HomePage();
+  }
   runApp(const MyApp());
 }
 
